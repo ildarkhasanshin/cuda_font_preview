@@ -27,21 +27,20 @@ class TplReplace(string.Template):
 
 class Command:
     opts_def = dict(
-        file_exts = ['ttf', 'woff', 'eot', 'otf', 'ttc'],
+        file_exts = 'ttf,woff,eot,otf,ttc',
         tpl_fn = 'template.tpl',
         ft = 'The quick brown fox jumps over the lazy dog.',
         ft_loc = 'Съешь же ещё этих мягких французских булок, да выпей чаю.',
     )
 
     def __init__(self):
+        self.opts = self.load_opts()
         if not os.path.isdir(dir_temp):
             os.mkdir(dir_temp)
 
     def on_open_pre(self, ed_self, fn):
-        opts = self.load_opts()
-
         file_ext = self.get_fn_fe(fn)[1]
-        if file_ext in opts['file_exts']:
+        if file_ext in self.opts['file_exts']:
             self.run(fn)
 
     def on_exit(self, ed_self):
@@ -50,20 +49,19 @@ class Command:
                 os.remove(os.path.join(dir_temp, f))
         os.rmdir(dir_temp)
 
-    def ini_convert(self, val):
-        return ','.join(val) if isinstance(val, list) else val
-
     def load_opts(self):
-        opts_load = dict()
+        data = dict()
         for key in self.opts_def:
-            opts_load[key] = ini_read(fn_config, ini_section, key, '')
-            if not opts_load[key]:
-                ini_write(fn_config, ini_section, key, self.ini_convert(self.opts_def[key]))
-                opts_load[key] = self.opts_def[key]
+            data[key] = ini_read(fn_config, ini_section, key, self.opts_def[key])
 
-        return opts_load
+        return data
+
+    def save_opts(self):
+        for key in self.opts:
+            ini_write(fn_config, ini_section, key, self.opts[key])
 
     def config(self):
+        self.save_opts()
         file_open(fn_config)
         lines = [ed.get_text_line(i) for i in range(ed.get_line_count())]
         try:
@@ -79,8 +77,7 @@ class Command:
         return fn, fe, fn_only
 
     def run(self, fn):
-        opts = self.load_opts()
-        tpl = plug_path + os.sep + opts['tpl_fn']
+        tpl = plug_path + os.sep + self.opts['tpl_fn']
         if os.path.isfile(tpl):
             with open(tpl, 'r', encoding='utf-8') as f:
                 text = f.read()
@@ -88,8 +85,8 @@ class Command:
                 font_title = self.get_fn_fe(fn)[0],
                 font_name = self.get_fn_fe(fn)[2],
                 font_file = fn,
-                fish_text = opts['ft'],
-                fish_text_loc = opts['ft_loc']
+                fish_text = self.opts['ft'],
+                fish_text_loc = self.opts['ft_loc']
             )
 
             fn_temp = os.path.join(dir_temp, os.path.basename(fn) + '.html')
