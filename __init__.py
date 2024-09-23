@@ -2,7 +2,7 @@ import os
 import tempfile
 from cudatext import *
 
-from cudax_lib import get_translation
+from cudax_lib import get_translation, safe_open_url
 _ = get_translation(__file__)
 
 import re
@@ -78,14 +78,6 @@ class Command:
         fn_only = os.path.splitext(os.path.basename(fn))[0]
         return fn, fe, fn_only
 
-    def safe_open_url(self, url):
-        if os.name == 'nt':
-            import subprocess
-            subprocess.Popen(['start', '', url], shell=True)
-        else:
-            import webbrowser
-            webbrowser.open_new_tab(url)
-
     def run(self, fn):
         opts = self.load_opts()
         tpl = plug_path + os.sep + opts['tpl_fn']
@@ -106,7 +98,7 @@ class Command:
 
             if os.path.isfile(fn_temp):
                 msg_status(_('FontPreview: open file') + ' ' + fn_temp)
-                self.safe_open_url('file://' + fn_temp)
+                safe_open_url('file://' + fn_temp)
             else:
                 msg_status(_('FontPreview: cannot open file') + ' ' + fn_temp)
         else:
