@@ -27,7 +27,7 @@ class TplReplace(string.Template):
 class Command:
     opts_def = dict(
         file_exts = 'ttf,woff,eot,otf,ttc',
-        tpl_fn = 'template.tpl',
+        tpl_fn = 'template.html',
         ft = 'The quick brown fox jumps over the lazy dog.',
         ft_loc = 'Съешь же ещё этих мягких французских булок, да выпей чаю.',
     )
