@@ -20,7 +20,6 @@ class TplReplace(string.Template):
     \{\{(?:
     (?P<escaped>\{\{) |
     (?P<named>[_a-z][_a-z0-9]*)\}\} |
-    (?P<braced>[_a-z][_a-z0-9]*)\}\} |
     (?P<invalid>)
     )
     '''
