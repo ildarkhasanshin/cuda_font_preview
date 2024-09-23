@@ -42,6 +42,7 @@ class Command:
         file_ext = self.get_fn_fe(fn)[1]
         if file_ext in self.opts['file_exts']:
             self.run(fn)
+            return False
 
     def on_exit(self, ed_self):
         if os.path.isdir(dir_temp):

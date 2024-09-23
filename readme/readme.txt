@@ -4,8 +4,7 @@ Shows html-preview of font-file (default-ext: ttf, woff, eot, otf, ttc) in WebBr
 How to use
 ----------
 1) Open font-file in CudaText
-2) In CudaText-dialog "File is maybe not text" press "Cancel"-button or ESC-key.
-3) Switch to default-WebBrowser where opened new tab with html-preview of font.
+2) Switch to default-WebBrowser where opened new tab with html-preview of font.
 
 Configuration
 -------------
