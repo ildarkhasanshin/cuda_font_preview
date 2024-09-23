@@ -40,7 +40,7 @@ class Command:
 
     def on_open_pre(self, ed_self, fn):
         file_ext = self.get_fn_fe(fn)[1]
-        if file_ext in self.opts['file_exts']:
+        if file_ext in self.opts['file_exts'].split(','):
             self.run(fn)
             return False
 
