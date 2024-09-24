@@ -51,8 +51,20 @@ class Command:
                 os.remove(os.path.join(dir_temp, f))
         os.rmdir(dir_temp)
 
-    def get_locale(self):
-        return locale.getlocale()[0].split('_')[0]
+    def get_locales(self):
+        loc = locale.getlocale()[0].split('_')[0]
+        if loc not in locales:
+            locales.append(loc)
+
+        return locales
+
+    def get_fts(self):
+        locales_ = self.get_locales()
+        fts = dict()
+        for loc in locales_:
+            fts[loc] = self.opts['ft'] if loc == locales[0] else self.opts['ft_loc']
+
+        return fts
 
     def load_opts(self):
         data = dict()
@@ -63,6 +75,8 @@ class Command:
 
     def save_opts(self):
         for key in self.opts:
+            if len(self.get_locales()) == 1 and key == 'ft_loc':
+                continue
             ini_write(fn_config, ini_section, key, self.opts[key])
 
     def config(self):
@@ -109,9 +123,6 @@ class Command:
             msg_status(_('FontPreview: cannot open file') + ' ' + tpl)
 
     def run(self, fn):
-        loc = self.get_locale()
-        if loc not in locales:
-            locales.append(loc)
-        for loc in locales:
-            ft = self.opts['ft_loc'] if loc != locales[0] else self.opts['ft']
+        fts = self.get_fts()
+        for loc, ft in fts.items():
             self.gen_html(fn, loc, ft)
