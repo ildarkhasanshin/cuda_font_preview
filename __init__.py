@@ -7,12 +7,14 @@ _ = get_translation(__file__)
 
 import re
 import string
+import locale
 
 plug_path = os.path.dirname(os.path.abspath(__file__))
 plug_name = os.path.basename(plug_path)
 dir_temp = os.path.join(tempfile.gettempdir(), plug_name)
 fn_config = os.path.join(app_path(APP_DIR_SETTINGS), 'plugins.ini')
 ini_section = plug_name.replace('cuda_', '')
+locales = ['en']
 
 class TplReplace(string.Template):
     delimiter = '{{'
@@ -28,8 +30,8 @@ class Command:
     opts_def = dict(
         file_exts = 'ttf,woff,eot,otf,ttc',
         tpl_fn = 'template.html',
-        ft = 'The quick brown fox jumps over the lazy dog.',
-        ft_loc = 'Съешь же ещё этих мягких французских булок, да выпей чаю.',
+        ft = 'abcdefghijklmnopqrstuvwxyz|ABCDEFGHIJKLMNOPQRSTUVWXYZ|The quick brown fox jumps over the lazy dog.',
+        ft_loc = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя|АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ|Съешь же ещё этих мягких французских булок, да выпей чаю.',
     )
 
     def __init__(self):
@@ -48,6 +50,9 @@ class Command:
             for f in os.listdir(dir_temp):
                 os.remove(os.path.join(dir_temp, f))
         os.rmdir(dir_temp)
+
+    def get_locale(self):
+        return locale.getlocale()[0].split('_')[0]
 
     def load_opts(self):
         data = dict()
@@ -76,20 +81,22 @@ class Command:
         fn_only = os.path.splitext(os.path.basename(fn))[0]
         return fn, fe, fn_only
 
-    def run(self, fn):
+    def gen_html(self, fn, loc, ft):
         tpl = plug_path + os.sep + self.opts['tpl_fn']
         if os.path.isfile(tpl):
             with open(tpl, 'r', encoding='utf-8') as f:
                 text = f.read()
+            ft_parts = ft.split('|')
             text = TplReplace(text).safe_substitute(
                 font_title = self.get_fn_fe(fn)[0],
                 font_name = self.get_fn_fe(fn)[2],
                 font_file = fn,
-                fish_text = self.opts['ft'],
-                fish_text_loc = self.opts['ft_loc']
+                fish_text_1 = ft_parts[0],
+                fish_text_2 = ft_parts[1],
+                fish_text_3 = ft_parts[2]
             )
 
-            fn_temp = os.path.join(dir_temp, os.path.basename(fn) + '.html')
+            fn_temp = os.path.join(dir_temp, os.path.basename(fn) + '_' + loc + '.html')
             with open(fn_temp, 'w', encoding='utf-8') as f:
                 f.write(text)
 
@@ -100,3 +107,11 @@ class Command:
                 msg_status(_('FontPreview: cannot open file') + ' ' + fn_temp)
         else:
             msg_status(_('FontPreview: cannot open file') + ' ' + tpl)
+
+    def run(self, fn):
+        loc = self.get_locale()
+        if loc not in locales:
+            locales.append(loc)
+        for loc in locales:
+            ft = self.opts['ft_loc'] if loc != locales[0] else self.opts['ft']
+            self.gen_html(fn, loc, ft)

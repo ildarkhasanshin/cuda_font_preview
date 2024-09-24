@@ -12,7 +12,7 @@ Menu item "Options / Settings-plugins / Font Preview / Config".
 
 Options in the settings/plugins.ini file, in [font_preview], are:
 - "file_exts": file-extensions that the plugin will open
-- "tpl_fn": file-template for html-preview (base file-name in plugin dir, ex. template.html)
+- "tpl_fn": file-template for html-preview (base file-name in plugin dir, ex. template.html): lowercase, uppercase and fish-text with delimiters "|".
 - "ft": fish-text
 - "ft_loc": local fish-text
 
